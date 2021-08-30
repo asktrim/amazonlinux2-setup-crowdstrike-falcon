@@ -10,7 +10,7 @@ python /tmp/download-falcon.py /tmp/falcon-sensor.rpm
 
 yum -y install /tmp/falcon-sensor.rpm
 
-/opt/CrowdStrike/falcon-ctl -s -f --cid=$CLOUDSIM_CID
+/opt/CrowdStrike/falconctl -s -f --cid=$CLOUDSIM_CID
 
 systemctl enable falcon-sensor.service
 systemctl start falcon-sensor.service
