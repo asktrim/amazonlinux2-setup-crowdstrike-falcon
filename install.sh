@@ -7,8 +7,9 @@ export $(aws ssm get-parameters --region "us-east-1" --with-decryption --names '
 sudo yum install yum-cron
 
 curl -fsSL https://raw.githubusercontent.com/asktrim/amazonlinux2-setup-crowdstrike-falcon/main/download-falcon.py -o /tmp/download-falcon.py
-# Overwrite yum-cron.conf
-curl -fsSL https://raw.githubusercontent.com/asktrim/amazonlinux2-setup-crowdstrike-falcon/main/yum-cron.conf -o /etc/yum/yum-cron.conf
+# Overwrite yum-cron.conf sections
+sudo sed -i "s/apply_updates = no/apply_updates = yes/" /etc/yum/yum-cron.conf
+sudo sed -i "s/update_cmd = default/update_cmd = security/" /etc/yum/yum-cron.conf
 
 python /tmp/download-falcon.py /tmp/falcon-sensor.rpm
 
