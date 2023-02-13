@@ -13,12 +13,12 @@ sudo sed -i "s/update_cmd = default/update_cmd = security/" /etc/yum/yum-cron.co
 
 python /tmp/download-falcon.py /tmp/falcon-sensor.rpm
 
-yum -y install /tmp/falcon-sensor.rpm
+sudo yum -y install /tmp/falcon-sensor.rpm
 
-/opt/CrowdStrike/falconctl -s -f --cid=$CLOUDSIM_CID --tags=$CLOUDSIM_TAGS --trace=debug --feature=enableLog --message-log=true
+sudo /opt/CrowdStrike/falconctl -s -f --cid=$CLOUDSIM_CID --tags=$CLOUDSIM_TAGS --trace=debug --feature=enableLog --message-log=true
 
-systemctl enable falcon-sensor.service
-systemctl start falcon-sensor.service
+sudo systemctl enable falcon-sensor.service
+sudo systemctl start falcon-sensor.service
 sudo service yum-cron start
 sudo systemctl enable yum-cron
 
