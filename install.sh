@@ -21,3 +21,12 @@ sudo systemctl enable falcon-sensor.service
 sudo systemctl start falcon-sensor.service
 sudo service yum-cron start
 sudo systemctl enable yum-cron
+
+# Install and enable live kernal pathcing
+sudo yum install binutils
+sudo yum install -y yum-plugin-kernel-livepatch
+sudo yum kernel-livepatch enable -y
+sudo yum install -y kpatch-runtime
+sudo yum update kpatch-runtime
+yum install -y yum-plugin-kernel-livepatch
+sudo amazon-linux-extras enable livepatch
