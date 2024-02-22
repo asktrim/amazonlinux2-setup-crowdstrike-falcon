@@ -30,7 +30,7 @@ then
   # install and configure falcon
   sudo yum -y install /tmp/falcon-sensor.rpm
 
-  sudo /opt/CrowdStrike/falconctl -s -f --cid=$CLOUDSIM_CID --tags=$CLOUDSIM_TAGS --trace=debug --feature=enableLog --message-log=true
+  sudo /opt/CrowdStrike/falconctl -s -f --cid=$CLOUDSIM_CID --tags=$CLOUDSIM_TAGS --trace=debug --feature=enableLog
 
   # enable and start falcon
   sudo systemctl enable falcon-sensor.service
