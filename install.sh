@@ -38,8 +38,6 @@ then
 
   #Install salt sensor
   sudo amazon-linux-extras install -y epel
-  curl -O https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/n/ngrep-1.47-1.1.20180101git9b59468.el7.x86_64.rpm
-  sudo yum install -y ngrep-1.47-1.1.20180101git9b59468.el7.x86_64.rpm
   sudo amazon-linux-extras enable python3.8 
   sudo yum install -y python3.8
 
