@@ -1,0 +1,92 @@
+name: wiz-cli
+
+on:
+  pull_request:
+
+jobs:
+  wiz-cli-iac-scan:
+    name: Wiz-cli IaC Scan
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      SCAN_PATH: .
+      POLICY: 1_High_Misconfiguration
+      DOCKER_POLICY: custom-policy-high-critical-CVE-vulnerabilities
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials from Test account
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::014524682603:role/oidc-for-github
+          aws-region: us-east-1
+
+      - name: Get required secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |
+            WIZ_CLIENT_ID_V1,WIZ_CLIENT_ID_V1
+            WIZ_CLIENT_SECRET_V1,WIZ_CLIENT_SECRET_V1
+            JFROG_CREDENTIALS,jfrog
+            JFROG_NPMRC_FILE,jfrog_npmrc_node18
+
+      - name: Download Wiz CLI
+        run: |
+          curl -Lo wizcli.gz https://downloads.wiz.io/v1/wizcli/latest/wizcli-linux-amd64.gz
+          gunzip wizcli.gz
+          chmod +x wizcli
+
+      - name: Login to Docker registry
+        run: echo "$JFROG_CREDENTIALS" | docker login --username "techops.jfa.prod@omf.com" --password-stdin "jfafn.jfrog.io"
+
+      - name: Download .npmrc file
+        run: echo "$JFROG_NPMRC_FILE" > .npmrc
+
+      - name: Docker build and scan
+        run: |
+          if test -f "Dockerfile"; then
+            docker build -t "$GITHUB_REPOSITORY:$GITHUB_SHA" .
+            docker images
+            ./wizcli docker scan \
+              --image "$GITHUB_REPOSITORY:$GITHUB_SHA" \
+              --tag "repo=$GITHUB_REPOSITORY" \
+              --tag "branch=$GITHUB_REF_NAME" \
+              --tag "commit=$GITHUB_SHA" \
+              -p "$DOCKER_POLICY" \
+              --policy-hits-only \
+              --client-id "$WIZ_CLIENT_ID_V1" \
+              --client-secret "$WIZ_CLIENT_SECRET_V1"
+          fi
+
+      - name: Run wiz-cli IaC scan
+        run: |
+          ./wizcli iac scan \
+            --path "$SCAN_PATH" \
+            --policy "$POLICY" \
+            --tag "repo=$GITHUB_REPOSITORY" \
+            --tag "branch=$GITHUB_REF_NAME" \
+            --tag "commit=$GITHUB_SHA" \
+            --policy-hits-only \
+            --timeout 30m \
+            --client-id "$WIZ_CLIENT_ID_V1" \
+            --client-secret "$WIZ_CLIENT_SECRET_V1"
+
+      - name: Run wiz-cli custom-policy-secrets scan
+        run: |
+          ./wizcli iac scan \
+            --path "$SCAN_PATH" \
+            --policy "custom-policy-secrets" \
+            --tag "repo=$GITHUB_REPOSITORY" \
+            --tag "branch=$GITHUB_REF_NAME" \
+            --tag "commit=$GITHUB_SHA" \
+            --policy-hits-only \
+            --timeout 30m \
+            --client-id "$WIZ_CLIENT_ID_V1" \
+            --client-secret "$WIZ_CLIENT_SECRET_V1"
